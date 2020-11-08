@@ -34,6 +34,8 @@ import com.example.avjindersinghsekhon.minimaltodo.AddToDo.AddToDoActivity;
 import com.example.avjindersinghsekhon.minimaltodo.AddToDo.AddToDoFragment;
 import com.example.avjindersinghsekhon.minimaltodo.Analytics.AnalyticsApplication;
 import com.example.avjindersinghsekhon.minimaltodo.AppDefault.AppDefaultFragment;
+import com.example.avjindersinghsekhon.minimaltodo.DataStore.DataModel;
+import com.example.avjindersinghsekhon.minimaltodo.DataStore.Transact;
 import com.example.avjindersinghsekhon.minimaltodo.R;
 import com.example.avjindersinghsekhon.minimaltodo.Reminder.ReminderFragment;
 import com.example.avjindersinghsekhon.minimaltodo.Settings.SettingsActivity;
@@ -46,6 +48,7 @@ import com.example.avjindersinghsekhon.minimaltodo.Utility.TodoNotificationServi
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -227,7 +230,10 @@ public class MainFragment extends AppDefaultFragment {
 
         try {
             items = storeRetrieveData.loadFromFile();
-
+// start--------------------------------------------------------------------------------------------
+//            Transact t = new Transact();
+//            t.loadFromFile();
+// end----------------------------------------------------------------------------------------------
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
@@ -435,6 +441,14 @@ public class MainFragment extends AppDefaultFragment {
     public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.ViewHolder> implements ItemTouchHelperClass.ItemTouchHelperAdapter {
         private ArrayList<ToDoItem> items;
 
+//start---------------------------------------------------------------------------------------------
+
+        // get list of data items
+        Transact t = new Transact();
+        private ArrayList<DataModel> datalist  = t.loadFromFile();
+
+//end-----------------------------------------------------------------------------------------------
+
         @Override
         public void onItemMoved(int fromPosition, int toPosition) {
             if (fromPosition < toPosition) {
@@ -490,6 +504,14 @@ public class MainFragment extends AppDefaultFragment {
         @Override
         public void onBindViewHolder(final BasicListAdapter.ViewHolder holder, final int position) {
             ToDoItem item = items.get(position);
+
+//start---------------------------------------------------------------------------------------------
+
+            // get an item (to do task) from datalist
+
+            DataModel di = datalist.get(position);
+
+//end---------------------------------------------------------------------------------------------
 //            if(item.getToDoDate()!=null && item.getToDoDate().before(new Date())){
 //                item.setToDoDate(null);
 //            }
@@ -508,14 +530,17 @@ public class MainFragment extends AppDefaultFragment {
             holder.linearLayout.setBackgroundColor(bgColor);
 
             if (item.hasReminder() && item.getToDoDate() != null) {
+//            if (di.isReminder() && di.getDate() != null) {
                 holder.mToDoTextview.setMaxLines(1);
                 holder.mTimeTextView.setVisibility(View.VISIBLE);
-//                holder.mToDoTextview.setVisibility(View.GONE);
+                holder.mToDoTextview.setVisibility(View.GONE);
             } else {
                 holder.mTimeTextView.setVisibility(View.GONE);
                 holder.mToDoTextview.setMaxLines(2);
             }
             holder.mToDoTextview.setText(item.getToDoText());
+//            holder.mToDoTextview.setText(di.getTitle());
+
             holder.mToDoTextview.setTextColor(todoTextColor);
 //            holder.mColorTextView.setBackgroundColor(Color.parseColor(item.getTodoColor()));
 
@@ -528,20 +553,25 @@ public class MainFragment extends AppDefaultFragment {
 //            }
 //            Log.d("OskarSchindler", "Color: "+item.getTodoColor());
             TextDrawable myDrawable = TextDrawable.builder().beginConfig()
-                    .textColor(Color.WHITE)
+                    .textColor(Color.YELLOW)
                     .useFont(Typeface.DEFAULT)
                     .toUpperCase()
                     .endConfig()
                     .buildRound(item.getToDoText().substring(0, 1), item.getTodoColor());
+//                    .buildRound(di.getTitle().substring(0, 1),Color.BLUE );
 
 //            TextDrawable myDrawable = TextDrawable.builder().buildRound(item.getToDoText().substring(0,1),holder.color);
             holder.mColorImageView.setImageDrawable(myDrawable);
-            if (item.getToDoDate() != null) {
+
+//            if (item.getToDoDate() != null) {
+            if (di.getDate() != null) {
                 String timeToShow;
                 if (android.text.format.DateFormat.is24HourFormat(getContext())) {
                     timeToShow = AddToDoFragment.formatDate(MainFragment.DATE_TIME_FORMAT_24_HOUR, item.getToDoDate());
+//                    timeToShow = di.getDate() + " " + di.getTime();
                 } else {
                     timeToShow = AddToDoFragment.formatDate(MainFragment.DATE_TIME_FORMAT_12_HOUR, item.getToDoDate());
+//                    timeToShow = di.getDate() + " " + di.getTime();
                 }
                 holder.mTimeTextView.setText(timeToShow);
             }

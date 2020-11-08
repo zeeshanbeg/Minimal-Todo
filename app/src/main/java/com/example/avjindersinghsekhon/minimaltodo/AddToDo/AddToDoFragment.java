@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.example.avjindersinghsekhon.minimaltodo.Analytics.AnalyticsApplication;
 import com.example.avjindersinghsekhon.minimaltodo.AppDefault.AppDefaultFragment;
+import com.example.avjindersinghsekhon.minimaltodo.DataStore.DataModel;
 import com.example.avjindersinghsekhon.minimaltodo.Main.MainActivity;
 import com.example.avjindersinghsekhon.minimaltodo.Main.MainFragment;
 import com.example.avjindersinghsekhon.minimaltodo.R;
@@ -50,7 +51,8 @@ import static android.app.Activity.RESULT_OK;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
-public class AddToDoFragment extends AppDefaultFragment implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class AddToDoFragment extends AppDefaultFragment implements DatePickerDialog.OnDateSetListener,
+        TimePickerDialog.OnTimeSetListener {
     private static final String TAG = "AddToDoFragment";
     private Date mLastEdited;
 
@@ -91,8 +93,21 @@ public class AddToDoFragment extends AppDefaultFragment implements DatePickerDia
     private String theme;
     AnalyticsApplication app;
 
+//start--------------------------------------------------------------------------------------------
+    // object for DataModel Class
+    private DataModel dataModel;
+//end----------------------------------------------------------------------------------------------
+
+    //<editor-fold desc="Description">
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+//start--------------------------------------------------------------------------------------------
+        // initialize DataModel Class
+        dataModel = new DataModel();
+//end----------------------------------------------------------------------------------------------
+
+
         super.onViewCreated(view, savedInstanceState);
         app = (AnalyticsApplication) getActivity().getApplication();
 //        setContentView(R.layout.new_to_do_layout);
@@ -277,9 +292,31 @@ public class AddToDoFragment extends AppDefaultFragment implements DatePickerDia
         });
 
 
+       /* add the to do task to permanent db
+                add title, desc, remind me, date and time
+       */
         mToDoSendFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+//start--------------------------------------------------------------------------------------------
+                //Toast.makeText(getContext(), "FAB clicked", Toast.LENGTH_SHORT).show();
+                /*
+                if DataModel object has been successfully initialized, then proceed to store it
+                in file
+                */
+                if(dataModel != null) {
+                    String status = dataModel.storeData(mToDoTextBodyEditText.getText().toString(),
+                            mToDoTextBodyDescription.getText().toString(),
+                            mDateEditText.getText().toString(),
+                            mTimeEditText.getText().toString(),
+                            mToDoDateSwitch.isChecked());
+
+                    Toast.makeText(getContext(), status, Toast.LENGTH_SHORT).show();
+                }
+//end----------------------------------------------------------------------------------------------
+
                 if (mToDoTextBodyEditText.length() <= 0) {
                     mToDoTextBodyEditText.setError(getString(R.string.todo_error));
                 } else if (mUserReminderDate != null && mUserReminderDate.before(new Date())) {
@@ -413,6 +450,7 @@ public class AddToDoFragment extends AppDefaultFragment implements DatePickerDia
 //        });
 
     }
+    //</editor-fold>
 
     private void setDateAndTimeEditText() {
 
